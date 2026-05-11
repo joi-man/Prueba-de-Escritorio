@@ -312,6 +312,22 @@
 }
 
 @media (max-width: 600px) {
+  .exercise-nav { 
+    flex-direction: column; 
+    gap: 6px;
+  }
+  
+  .nav-btn { 
+    padding: 10px 12px; 
+    min-width: auto;
+    font-size: 0.8rem;
+  }
+  
+  .nav-text { display: flex; }
+  .nav-title { font-size: 0.8rem; }
+  .nav-desc { display: block; font-size: 0.7rem; }
+  .nav-btn .icon { font-size: 1.2rem; }
+  
   .cell { 
     width: 28px; 
     height: 28px; 
