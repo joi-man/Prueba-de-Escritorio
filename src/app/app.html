@@ -1,0 +1,202 @@
+<div class="app-container">
+  <header class="header">
+    <h1>Prueba de Escritorio</h1>
+    <p>Procesamiento Digital de Imágenes</p>
+  </header>
+
+  <nav class="exercise-nav">
+    @for (ex of exercises; track ex.id) {
+      <button class="nav-btn" [class.active]="currentExercise() === ex.id" (click)="loadExercise(ex.id)" [title]="ex.desc">
+        <span class="icon">{{ ex.icon }}</span>
+        <span class="nav-text">
+          <span class="nav-title">{{ ex.title }}</span>
+          <span class="nav-desc">{{ ex.desc }}</span>
+        </span>
+      </button>
+    }
+  </nav>
+
+  @if (exerciseData(); as data) {
+    <div class="main-layout">
+      <div class="left-panel">
+        <div class="panel-header">
+          <h3>Matriz con Ventana</h3>
+          @if (getCurrentStepData(); as step) {
+            @if (step.position) {
+              <span class="position-badge">({{ step.position.row }}, {{ step.position.col }})</span>
+            }
+          }
+        </div>
+
+        <div class="matrix-wrapper">
+          <div class="matrix-container">
+            <div class="matrix-label">Imagen Original (10x10)</div>
+            <div class="matrix-grid">
+              <ng-container *ngFor="let row of data.matrix; let ri = index">
+                <div class="matrix-row">
+                  <ng-container *ngFor="let val of row; let ci = index">
+                    <div class="cell" [style.background-color]="getValueColor(val)" [class.highlight]="isCellHighlighted(ri, ci)" [class.noise]="isNoiseValue(val)">
+                      {{ val }}
+                    </div>
+                  </ng-container>
+                </div>
+              </ng-container>
+            </div>
+
+            @if (getCurrentStepData(); as step) {
+              @if (step.position) {
+                <div class="window-box" [style.top.px]="getWindowPosition().top" [style.left.px]="getWindowPosition().left">
+                  <span class="window-label">5x5</span>
+                </div>
+              }
+            }
+          </div>
+
+          <div class="result-partial-box">
+            <div class="matrix-label">Matriz Resultado ({{ currentExercise() === 4 ? '15x15' : '6x6' }}) - Progresivo</div>
+            @if (getPartialResultMatrix(); as partial) {
+              <div class="matrix-grid">
+                <ng-container *ngFor="let row of partial; let ri = index">
+                  <div class="matrix-row">
+                    <ng-container *ngFor="let val of row; let ci = index">
+                      @if (val === -1) {
+                        <div class="cell empty">-</div>
+                      } @else {
+                        <div class="cell result" [class.current]="isCurrentCell(ri, ci)" [style.background-color]="getValueColor(val)">{{ val }}</div>
+                      }
+                    </ng-container>
+                  </div>
+                </ng-container>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div class="controls-hint">
+          <span>← → Navegar</span>
+          <span>Espacio Play/Pausa</span>
+        </div>
+        
+        <div class="controls-bar">
+          <div class="controls-info">
+            <span class="hint">← → Navegar</span>
+            <span class="hint">Espacio Play/Pausa</span>
+          </div>
+          <div class="controls-buttons">
+            <button class="ctrl-btn" (click)="prevStep()" [disabled]="currentStep() === 0">&#9664;</button>
+            <button class="ctrl-btn play" (click)="isPlaying() ? stop() : play()">{{ isPlaying() ? '&#9632;' : '&#9654;' }}</button>
+            <button class="ctrl-btn" (click)="nextStep()" [disabled]="currentStep() === steps().length - 1">&#9654;</button>
+            <span class="step-counter">{{ getStepProgress() }}</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-container">
+          <div class="progress-bar"><div class="progress-fill" [style.width.%]="getProgressPercentage()"></div></div>
+          <div class="step-dots">
+            @for (s of steps(); track s.id) {
+              <button class="dot" [class.active]="currentStep() === $index" (click)="goToStep($index)"></button>
+            }
+          </div>
+        </div>
+
+        <div class="step-content">
+          @if (getCurrentStepData(); as step) {
+            <div class="step-card" [class.final]="step.showFinal">
+              <div class="exercise-header">
+                <span class="exercise-badge">Ejercicio {{ currentExercise() }}</span>
+                <span class="exercise-name">{{ exerciseData()?.name }}</span>
+              </div>
+              
+              <h3 class="step-title"><span class="step-num">{{ step.id }}</span> {{ step.title }}</h3>
+              <p class="step-desc">{{ step.description }}</p>
+
+              @if (step.formulaOriginal || step.formulaApplied) {
+                <div class="formula-box">
+                  @if (step.formulaOriginal) {
+                    <div class="formula-row">
+                      <span class="formula-label">Fórmula Original:</span>
+                      <span class="formula-text">{{ step.formulaOriginal }}</span>
+                    </div>
+                  }
+                  @if (step.formulaApplied) {
+                    <div class="formula-row highlight">
+                      <span class="formula-label">Aplicado:</span>
+                      <span class="formula-text">{{ step.formulaApplied }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (step.submatrix && !step.showFinal) {
+                <div class="submatrix-box">
+                  <div class="matrix-label">Submatriz 5x5</div>
+                  <div class="matrix-grid tiny">
+                    <ng-container *ngFor="let row of step.submatrix">
+                      <div class="matrix-row">
+                        <ng-container *ngFor="let val of row">
+                          <div class="cell" [style.background-color]="getValueColor(val)" [class.noise]="isNoiseValue(val)">{{ val }}</div>
+                        </ng-container>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              }
+
+              @if (step.kernel) {
+                <div class="kernel-box">
+                  <div class="matrix-label">Kernel</div>
+                  <div class="matrix-grid tiny">
+                    <ng-container *ngFor="let row of step.kernel">
+                      <div class="matrix-row">
+                        <ng-container *ngFor="let val of row">
+                          <div class="cell kernel-cell" [style.background-color]="getKernelColor(val)">{{ val }}</div>
+                        </ng-container>
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              }
+
+              @if (step.sortedValues) {
+                <div class="sorted-box">
+                  <div class="matrix-label">Valores Ordenados (pos 13)</div>
+                  <div class="sorted-list">
+                    @for (v of step.sortedValues; track v) {
+                      <span class="sorted-val" [class.median]="$index === step.medianPosition">{{ v }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (step.calculationDetails) {
+                <div class="calc-box">
+                  @for (calc of step.calculationDetails; track calc.label) {
+                    <div class="calc-row" [class.highlight]="calc.highlight">
+                      <span>{{ calc.label }}</span><span>{{ calc.value }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (step.result !== undefined && step.result !== 0 && !step.showFinal) {
+                <div class="result-display"><span>=</span> <strong>{{ step.result }}</strong></div>
+              }
+
+              @if (step.histogram) {
+                <div class="histogram-box">
+                  <div class="histogram-bars">
+                    @for (count of step.histogram; track $index) {
+                      <div class="bar-col"><div class="bar" [style.height.%]="(count/225)*100">{{ count }}</div><span>{{ $index }}</span></div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
