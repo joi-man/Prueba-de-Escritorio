@@ -97,7 +97,7 @@
 .panel-header h3 { margin: 0; font-size: 0.9rem; color: #00d4ff; }
 .position-badge { padding: 4px 10px; background: rgba(0,212,255,0.2); border-radius: 15px; font-size: 0.8rem; color: #00d4ff; }
 
-.matrix-wrapper { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.matrix-wrapper { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-x: hidden; }
 .matrix-container { position: relative; }
 .matrix-label { font-size: 0.75rem; color: #888; margin-bottom: 5px; }
 
@@ -313,8 +313,23 @@
 }
 
 @media (max-width: 500px) {
+  :host {
+    overflow-x: hidden;
+  }
+  
   .app-container {
     padding: 10px;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  .left-panel {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  .matrix-grid {
+    overflow-x: hidden;
   }
   
   .header {
@@ -395,9 +410,9 @@
 
 @media (max-width: 400px) {
   .cell { 
-    width: 24px; 
-    height: 24px; 
-    font-size: 0.5rem; 
+    width: 22px; 
+    height: 22px; 
+    font-size: 0.45rem; 
   }
   
   .step-content { max-height: 450px; }
