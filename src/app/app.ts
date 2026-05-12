@@ -260,18 +260,17 @@ export class App {
     const step = this.getCurrentStepData();
     if (!step?.position) return { top: 0, left: 0 };
     const pos = step.position;
-    
-    const isMobile = window.innerWidth <= 600;
-    const isSmallMobile = window.innerWidth <= 400;
-    
-    const cellSize = isSmallMobile ? 24 : (isMobile ? 28 : 33);
-    const gap = 1;
-    const gridPadding = 5;
-    const labelHeight = isMobile ? 14 : 18;
-    const containerPadding = isMobile ? 15 : 15;
-    
-    const top = pos.row * (cellSize + gap) + gridPadding + labelHeight + containerPadding;
-    const left = pos.col * (cellSize + gap) + gridPadding + containerPadding;
+    // Celda: 32px, Gap: 1px, Total por celda: 33px
+    // Padding del matrix-grid: 5px
+    // Offset adicional por el label "Imagen Original" y container padding
+    const cellSize = 33;
+    const paddingGrid = 2;
+    const containerPadding = 4;
+    const labelHeight = 18;
+    const offsetX = containerPadding + paddingGrid; // 20
+    const offsetY = containerPadding + labelHeight + paddingGrid; // 40
+    const top = pos.row * cellSize + offsetY;
+    const left = pos.col * cellSize + offsetX;
     return { top, left };
   }
 
