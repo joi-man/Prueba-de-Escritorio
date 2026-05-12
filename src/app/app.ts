@@ -34,7 +34,9 @@ export class App {
     { id: 1, title: 'Filtro Promedio', icon: '▦', desc: 'Suaviza la imagen calculando la media de vecindades 5x5' },
     { id: 2, title: 'Filtro Gaussiano', icon: '◐', desc: 'Aplica ponderación gaussiana para suavizado con preservación de bordes' },
     { id: 3, title: 'Filtro Mediana', icon: '◑', desc: 'Elimina ruido impulsivo (sal y pimienta) usando la mediana' },
-    { id: 4, title: 'Ecualización', icon: '📊', desc: 'Mejora el contraste redistribuyendo los niveles de gris' }
+    { id: 4, title: 'Ecualización', icon: '📊', desc: 'Mejora el contraste redistribuyendo los niveles de gris' },
+    { id: 5, title: 'Filtro Mínimo', icon: '▼', desc: 'Toma el valor mínimo de la vecindad 5x5' },
+    { id: 6, title: 'Filtro Máximo', icon: '▲', desc: 'Toma el valor máximo de la vecindad 5x5' }
   ];
 
   constructor(private imageService: ImageProcessingService) {
@@ -71,6 +73,18 @@ export class App {
         this.exerciseData.set(data4);
         this.steps.set(this.imageService.generateHistogramSteps(data4.matrix, data4.L!, data4.N!));
         this.resultMatrix.set(null);
+        break;
+      case 5:
+        const data5 = this.imageService.getExercise5Data();
+        this.exerciseData.set(data5);
+        this.steps.set(this.imageService.generateMinimumSteps(data5.matrix));
+        this.resultMatrix.set(this.imageService.applyMinimumFilter(data5.matrix));
+        break;
+      case 6:
+        const data6 = this.imageService.getExercise6Data();
+        this.exerciseData.set(data6);
+        this.steps.set(this.imageService.generateMaximumSteps(data6.matrix));
+        this.resultMatrix.set(this.imageService.applyMaximumFilter(data6.matrix));
         break;
     }
     this.stepKey.update(k => k + 1);
@@ -200,6 +214,8 @@ export class App {
     const kernel = data.kernel;
     const isGaussian = this.currentExercise() === 2;
     const isMedian = this.currentExercise() === 3;
+    const isMinimum = this.currentExercise() === 5;
+    const isMaximum = this.currentExercise() === 6;
     const rows = matrix.length - 4;
     const cols = matrix[0].length - 4;
     const result: number[][] = [];
@@ -214,7 +230,25 @@ export class App {
         } else if (i === currentPos.row && j === currentPos.col && currentResult !== undefined) {
           row.push(currentResult);
         } else if (i < currentPos.row || (i === currentPos.row && j < currentPos.col)) {
-          if (isMedian) {
+          if (isMinimum) {
+            const values: number[] = [];
+            for (let ki = 0; ki < 5; ki++) {
+              for (let kj = 0; kj < 5; kj++) {
+                values.push(matrix[i + ki][j + kj]);
+              }
+            }
+            const sorted = values.sort((a, b) => a - b);
+            row.push(sorted[0]);
+          } else if (isMaximum) {
+            const values: number[] = [];
+            for (let ki = 0; ki < 5; ki++) {
+              for (let kj = 0; kj < 5; kj++) {
+                values.push(matrix[i + ki][j + kj]);
+              }
+            }
+            const sorted = values.sort((a, b) => a - b);
+            row.push(sorted[24]);
+          } else if (isMedian) {
             const values: number[] = [];
             for (let ki = 0; ki < 5; ki++) {
               for (let kj = 0; kj < 5; kj++) {

@@ -80,6 +80,38 @@ export class ImageProcessingService {
     return { name: 'Filtro de Mediana 5×5', matrix, kernel: Array(5).fill(null).map(() => Array(5).fill(1)), description: 'El filtro de mediana reemplaza cada píxel por el valor central de la vecindad 5x5.' };
   }
 
+  getExercise5Data() {
+    const matrix = [
+      [22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+      [23, 24, 25, 255, 27, 28, 29, 30, 31, 32],
+      [24, 25, 0, 27, 28, 29, 30, 255, 32, 33],
+      [25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+      [26, 27, 28, 29, 0, 31, 32, 33, 34, 35],
+      [27, 28, 29, 30, 31, 32, 255, 34, 35, 36],
+      [28, 29, 30, 31, 32, 33, 34, 35, 0, 37],
+      [29, 30, 31, 32, 33, 34, 35, 36, 37, 38],
+      [30, 31, 255, 33, 34, 35, 36, 37, 38, 39],
+      [31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
+    ];
+    return { name: 'Filtro Mínimo 5×5', matrix, kernel: Array(5).fill(null).map(() => Array(5).fill(1)), description: 'El filtro mínimo reemplaza cada píxel por el valor mínimo de la vecindad 5x5.' };
+  }
+
+  getExercise6Data() {
+    const matrix = [
+      [22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+      [23, 24, 25, 255, 27, 28, 29, 30, 31, 32],
+      [24, 25, 0, 27, 28, 29, 30, 255, 32, 33],
+      [25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+      [26, 27, 28, 29, 0, 31, 32, 33, 34, 35],
+      [27, 28, 29, 30, 31, 32, 255, 34, 35, 36],
+      [28, 29, 30, 31, 32, 33, 34, 35, 0, 37],
+      [29, 30, 31, 32, 33, 34, 35, 36, 37, 38],
+      [30, 31, 255, 33, 34, 35, 36, 37, 38, 39],
+      [31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
+    ];
+    return { name: 'Filtro Máximo 5×5', matrix, kernel: Array(5).fill(null).map(() => Array(5).fill(1)), description: 'El filtro máximo reemplaza cada píxel por el valor máximo de la vecindad 5x5.' };
+  }
+
   getExercise4Data() {
     const matrix = [
       [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2],
@@ -162,6 +194,46 @@ export class ImageProcessingService {
       }
     }
     steps.push({ id: 99, title: 'Matriz Resultante Final', description: 'Ruido impulsivo eliminado: valores 0 y 255 removidos.', matrix: this.applyMedianFilter(matrix), showFinal: true, formulaOriginal: 'I_sin_ruido = mediana(I_vecindad_5x5)', formulaApplied: 'Todos los valores 0 y 255 fueron reemplazados por valores válidos' });
+    return steps;
+  }
+
+  generateMinimumSteps(matrix: number[][]): Step[] {
+    const steps: Step[] = [];
+    steps.push({ id: 1, title: 'Imagen con Ruido Impulsivo', description: 'Valores 0 (sal) y 255 (pimienta) son ruido impulsivo. El filtro mínimo toma el valor más bajo.', matrix, formulaOriginal: 'I(x,y) con ruido = valores 0 o 255', formulaApplied: 'Filtro mínimo: tomar valor mínimo de la vecindad' });
+    steps.push({ id: 2, title: 'Filtro Mínimo', description: 'Para cada píxel: extraer vecindad 5x5, ordenar 25 valores, tomar el valor mínimo (posición 1).', formulaOriginal: 'I_new(x,y) = min{I(i,j) para i,j en vecindad 5x5}', formulaApplied: 'Mínimo = primer valor de valores ordenados' });
+
+    let stepNum = 3;
+    for (let i = 0; i < 6; i++) {
+      for (let j = 0; j < 6; j++) {
+        const submatrix = this.getSubmatrix(matrix, i, j, 5);
+        const values = this.flatten(submatrix);
+        const sorted = values.sort((a, b) => a - b);
+        const min = sorted[0];
+        steps.push({ id: stepNum, title: `Mínimo Posición (${i},${j})`, description: `Ordenar los 25 valores y tomar el valor mínimo (posición 1).`, position: { row: i, col: j }, submatrix, sortedValues: sorted, medianPosition: 0, formulaOriginal: 'Mínimo = sorted[0] de los 25 valores', formulaApplied: `Valores ordenados: [${sorted.slice(0,5).join(',')}...${sorted.slice(-5).join(',')}], Mínimo = ${min}`, calculationDetails: [{ label: 'min', value: `${min}`, highlight: true }, { label: `[1]`, value: `${min}`, highlight: true }, { label: 'max', value: `${sorted[24]}`, highlight: false }], result: min });
+        stepNum++;
+      }
+    }
+    steps.push({ id: 99, title: 'Matriz Resultante Final', description: 'Filtro mínimo aplicado. El ruido impulsivo (valores 0) se ha propagado.', matrix: this.applyMinimumFilter(matrix), showFinal: true, formulaOriginal: 'I_filtrada = mínimo(I_vecindad_5x5)', formulaApplied: 'Valores mínimos tomados de cada vecindad' });
+    return steps;
+  }
+
+  generateMaximumSteps(matrix: number[][]): Step[] {
+    const steps: Step[] = [];
+    steps.push({ id: 1, title: 'Imagen con Ruido Impulsivo', description: 'Valores 0 (sal) y 255 (pimienta) son ruido impulsivo. El filtro máximo toma el valor más alto.', matrix, formulaOriginal: 'I(x,y) con ruido = valores 0 o 255', formulaApplied: 'Filtro máximo: tomar valor máximo de la vecindad' });
+    steps.push({ id: 2, title: 'Filtro Máximo', description: 'Para cada píxel: extraer vecindad 5x5, ordenar 25 valores, tomar el valor máximo (posición 25).', formulaOriginal: 'I_new(x,y) = max{I(i,j) para i,j en vecindad 5x5}', formulaApplied: 'Máximo = último valor de valores ordenados' });
+
+    let stepNum = 3;
+    for (let i = 0; i < 6; i++) {
+      for (let j = 0; j < 6; j++) {
+        const submatrix = this.getSubmatrix(matrix, i, j, 5);
+        const values = this.flatten(submatrix);
+        const sorted = values.sort((a, b) => a - b);
+        const max = sorted[24];
+        steps.push({ id: stepNum, title: `Máximo Posición (${i},${j})`, description: `Ordenar los 25 valores y tomar el valor máximo (posición 25).`, position: { row: i, col: j }, submatrix, sortedValues: sorted, medianPosition: 24, formulaOriginal: 'Máximo = sorted[24] de los 25 valores', formulaApplied: `Valores ordenados: [${sorted.slice(0,5).join(',')}...${sorted.slice(-5).join(',')}], Máximo = ${max}`, calculationDetails: [{ label: 'min', value: `${sorted[0]}`, highlight: false }, { label: `[25]`, value: `${max}`, highlight: true }, { label: 'max', value: `${max}`, highlight: true }], result: max });
+        stepNum++;
+      }
+    }
+    steps.push({ id: 99, title: 'Matriz Resultante Final', description: 'Filtro máximo aplicado. El ruido impulsivo (valores 255) se ha propagado.', matrix: this.applyMaximumFilter(matrix), showFinal: true, formulaOriginal: 'I_filtrada = máximo(I_vecindad_5x5)', formulaApplied: 'Valores máximos tomados de cada vecindad' });
     return steps;
   }
 
@@ -276,6 +348,44 @@ export class ImageProcessingService {
         }
         const sorted = values.sort((a, b) => a - b);
         row.push(sorted[12]);
+      }
+      result.push(row);
+    }
+    return result;
+  }
+
+  applyMinimumFilter(matrix: number[][]): number[][] {
+    const size = 5, rows = matrix.length - size + 1, cols = matrix[0].length - size + 1, result: number[][] = [];
+    for (let i = 0; i < rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < cols; j++) {
+        const values: number[] = [];
+        for (let ki = 0; ki < size; ki++) {
+          for (let kj = 0; kj < size; kj++) {
+            values.push(matrix[i + ki][j + kj]);
+          }
+        }
+        const sorted = values.sort((a, b) => a - b);
+        row.push(sorted[0]);
+      }
+      result.push(row);
+    }
+    return result;
+  }
+
+  applyMaximumFilter(matrix: number[][]): number[][] {
+    const size = 5, rows = matrix.length - size + 1, cols = matrix[0].length - size + 1, result: number[][] = [];
+    for (let i = 0; i < rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < cols; j++) {
+        const values: number[] = [];
+        for (let ki = 0; ki < size; ki++) {
+          for (let kj = 0; kj < size; kj++) {
+            values.push(matrix[i + ki][j + kj]);
+          }
+        }
+        const sorted = values.sort((a, b) => a - b);
+        row.push(sorted[24]);
       }
       result.push(row);
     }
