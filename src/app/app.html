@@ -62,7 +62,7 @@
                       @if (val === -1) {
                         <div class="cell empty">-</div>
                       } @else {
-                        <div class="cell result" [class.current]="isCurrentCell(ri, ci)" [style.background-color]="getValueColor(val)">{{ val }}</div>
+                        <div class="cell result" [class.current]="isCurrentCell(ri, ci)" [style.background-color]="getValueColor(val)" [style.color]="getValueTextColor(val)">{{ val }}</div>
                       }
                     </ng-container>
                   </div>

@@ -154,6 +154,11 @@ export class App {
     return `rgb(${v}, ${v}, ${v})`;
   }
 
+  getValueTextColor(value: number): string {
+    const v = Math.min(255, Math.max(0, value));
+    return v > 128 ? 'black' : 'white';
+  }
+
   getCellColor(row: number, col: number): string {
     const data = this.exerciseData();
     if (!data) return 'rgb(0,0,0)';
