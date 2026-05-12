@@ -313,6 +313,8 @@
 }
 
 @media (max-width: 600px) {
+  .window-box { display: none !important; }
+  
   .exercise-nav { 
     flex-direction: column; 
     gap: 6px;
