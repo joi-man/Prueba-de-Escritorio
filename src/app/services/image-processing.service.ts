@@ -112,6 +112,23 @@ export class ImageProcessingService {
     return { name: 'Filtro Máximo 5×5', matrix, kernel: Array(5).fill(null).map(() => Array(5).fill(1)), description: 'El filtro máximo reemplaza cada píxel por el valor máximo de la vecindad 5x5.' };
   }
 
+  getExercise7Data() {
+    const matrix = [
+      [50, 50, 50, 50, 50, 50, 50, 50, 50, 50],
+      [50, 100, 100, 100, 100, 100, 100, 100, 100, 50],
+      [50, 100, 150, 150, 150, 150, 150, 150, 100, 50],
+      [50, 100, 150, 200, 200, 200, 200, 150, 100, 50],
+      [50, 100, 150, 200, 220, 220, 200, 150, 100, 50],
+      [50, 100, 150, 200, 220, 220, 200, 150, 100, 50],
+      [50, 100, 150, 200, 200, 200, 200, 150, 100, 50],
+      [50, 100, 150, 150, 150, 150, 150, 150, 100, 50],
+      [50, 100, 100, 100, 100, 100, 100, 100, 100, 50],
+      [50, 50, 50, 50, 50, 50, 50, 50, 50, 50]
+    ];
+    const kernel = [[0, -1, 0], [-1, 4, -1], [0, -1, 0]];
+    return { name: 'Filtro Laplaciano 3×3', matrix, kernel, description: 'El filtro laplaciano detecta bordes highlightdo la diferencia entre un píxel y sus vecinos.' };
+  }
+
   getExercise4Data() {
     const matrix = [
       [1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2],
@@ -234,6 +251,30 @@ export class ImageProcessingService {
       }
     }
     steps.push({ id: 99, title: 'Matriz Resultante Final', description: 'Filtro máximo aplicado. El ruido impulsivo (valores 255) se ha propagado.', matrix: this.applyMaximumFilter(matrix), showFinal: true, formulaOriginal: 'I_filtrada = máximo(I_vecindad_5x5)', formulaApplied: 'Valores máximos tomados de cada vecindad' });
+    return steps;
+  }
+
+  generateLaplacianSteps(matrix: number[][], kernel: number[][]): Step[] {
+    const steps: Step[] = [];
+    steps.push({ id: 1, title: 'Imagen Original con Bordes', description: 'Imagen con zonas de diferente intensidad para detectar bordes.', matrix, formulaOriginal: 'I(x,y) = valor píxel en escala de grises', formulaApplied: 'Zonas: fondo=50, interior=100-220' });
+    steps.push({ id: 2, title: 'Kernel Laplaciano 3x3', description: 'Kernel para detección de bordes. Resalta cambios rápidos de intensidad.', kernel, formulaOriginal: 'Laplaciano: [0,-1,0; -1,4,-1; 0,-1,0]', formulaApplied: 'Centro: 4, Vecinos: -1 cada uno' });
+
+    let stepNum = 3;
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const submatrix = this.getSubmatrix(matrix, i, j, 3);
+        let sum = 0;
+        for (let ki = 0; ki < 3; ki++) {
+          for (let kj = 0; kj < 3; kj++) {
+            sum += submatrix[ki][kj] * kernel[ki][kj];
+          }
+        }
+        const normalized = Math.max(0, Math.min(255, sum));
+        steps.push({ id: stepNum, title: `Laplaciano Posición (${i},${j})`, description: `Aplicar kernel laplaciano 3x3. La fórmula: L = 4*I(i,j) - I(arriba) - I(abajo) - I(izq) - I(der).`, position: { row: i, col: j }, submatrix, kernel, formulaOriginal: 'L(x,y) = 4*I(x,y) - I(x-1,y) - I(x+1,y) - I(x,y-1) - I(x,y+1)', formulaApplied: `Suma ponderada = ${sum}, Normalizado = clamp(${sum}, 0, 255) = ${normalized}`, calculationDetails: [{ label: '4×centro', value: `${submatrix[1][1] * 4}`, highlight: true }, { label: '-vecinos', value: `${-1 * (submatrix[0][1] + submatrix[2][1] + submatrix[1][0] + submatrix[1][2])}`, highlight: true }, { label: 'Resultado', value: `${sum}`, highlight: true }], result: normalized });
+        stepNum++;
+      }
+    }
+    steps.push({ id: 99, title: 'Matriz Resultante Final', description: 'Filtro laplaciano aplicado. Los bordes aparecen como valores altos (255) y las zonas suaves como valores bajos (0).', matrix: this.applyLaplacianFilter(matrix, kernel), showFinal: true, formulaOriginal: 'I_bordes = Laplaciano(I_original)', formulaApplied: 'Bordes detectados: transiciones de intensidad' });
     return steps;
   }
 
@@ -386,6 +427,24 @@ export class ImageProcessingService {
         }
         const sorted = values.sort((a, b) => a - b);
         row.push(sorted[24]);
+      }
+      result.push(row);
+    }
+    return result;
+  }
+
+  applyLaplacianFilter(matrix: number[][], kernel: number[][]): number[][] {
+    const size = 3, rows = matrix.length - size + 1, cols = matrix[0].length - size + 1, result: number[][] = [];
+    for (let i = 0; i < rows; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < cols; j++) {
+        let sum = 0;
+        for (let ki = 0; ki < size; ki++) {
+          for (let kj = 0; kj < size; kj++) {
+            sum += matrix[i + ki][j + kj] * kernel[ki][kj];
+          }
+        }
+        row.push(Math.max(0, Math.min(255, sum)));
       }
       result.push(row);
     }

@@ -36,7 +36,8 @@ export class App {
     { id: 3, title: 'Filtro Mediana', icon: '◑', desc: 'Elimina ruido impulsivo (sal y pimienta) usando la mediana' },
     { id: 4, title: 'Ecualización', icon: '📊', desc: 'Mejora el contraste redistribuyendo los niveles de gris' },
     { id: 5, title: 'Filtro Mínimo', icon: '▼', desc: 'Toma el valor mínimo de la vecindad 5x5' },
-    { id: 6, title: 'Filtro Máximo', icon: '▲', desc: 'Toma el valor máximo de la vecindad 5x5' }
+    { id: 6, title: 'Filtro Máximo', icon: '▲', desc: 'Toma el valor máximo de la vecindad 5x5' },
+    { id: 7, title: 'Filtro Laplaciano', icon: '◉', desc: 'Detecta bordes highlightdo diferencias de intensidad' }
   ];
 
   constructor(private imageService: ImageProcessingService) {
@@ -85,6 +86,12 @@ export class App {
         this.exerciseData.set(data6);
         this.steps.set(this.imageService.generateMaximumSteps(data6.matrix));
         this.resultMatrix.set(this.imageService.applyMaximumFilter(data6.matrix));
+        break;
+      case 7:
+        const data7 = this.imageService.getExercise7Data();
+        this.exerciseData.set(data7);
+        this.steps.set(this.imageService.generateLaplacianSteps(data7.matrix, data7.kernel!));
+        this.resultMatrix.set(this.imageService.applyLaplacianFilter(data7.matrix, data7.kernel!));
         break;
     }
     this.stepKey.update(k => k + 1);
@@ -221,8 +228,10 @@ export class App {
     const isMedian = this.currentExercise() === 3;
     const isMinimum = this.currentExercise() === 5;
     const isMaximum = this.currentExercise() === 6;
-    const rows = matrix.length - 4;
-    const cols = matrix[0].length - 4;
+    const isLaplacian = this.currentExercise() === 7;
+    const offset = isLaplacian ? 2 : 4;
+    const rows = matrix.length - offset;
+    const cols = matrix[0].length - offset;
     const result: number[][] = [];
     const currentPos = step.position;
     const currentResult = step.result;
@@ -253,6 +262,14 @@ export class App {
             }
             const sorted = values.sort((a, b) => a - b);
             row.push(sorted[24]);
+          } else if (isLaplacian && kernel) {
+            let sum = 0;
+            for (let ki = 0; ki < 3; ki++) {
+              for (let kj = 0; kj < 3; kj++) {
+                sum += matrix[i + ki][j + kj] * kernel[ki][kj];
+              }
+            }
+            row.push(Math.max(0, Math.min(255, sum)));
           } else if (isMedian) {
             const values: number[] = [];
             for (let ki = 0; ki < 5; ki++) {
