@@ -55,7 +55,8 @@
 .nav-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
 .nav-btn.active { background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(123,44,191,0.2)); border-color: #00d4ff; color: white; }
 
-.nav-text { display: flex; flex-direction: column; }
+.nav-text { display: flex; flex-direction: column; overflow: hidden; }
+.nav-text span { overflow: hidden; text-overflow: ellipsis; }
 .nav-title { font-weight: 600; font-size: 0.9rem; }
 .nav-desc { font-size: 0.7rem; opacity: 0.7; line-height: 1.2; }
 
@@ -324,8 +325,8 @@
   }
   
   .nav-text { display: flex; }
-  .nav-title { font-size: 0.8rem; }
-  .nav-desc { display: block; font-size: 0.7rem; }
+  .nav-title { font-size: 0.8rem; white-space: nowrap; }
+  .nav-desc { display: block; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .nav-btn .icon { font-size: 1.2rem; }
   
   .cell { 
