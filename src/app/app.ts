@@ -268,8 +268,12 @@ export class App {
     const paddingGrid = isMobile ? 1 : 2;
     const containerPadding = isMobile ? 2 : 4;
     const labelHeight = isMobile ? 14 : 18;
-    const offsetX = containerPadding + paddingGrid;
-    const offsetY = containerPadding + labelHeight + paddingGrid;
+    
+    const mobileOffsetX = isMobile ? 2 : 0;
+    const mobileOffsetY = isMobile ? 4 : 0;
+    
+    const offsetX = containerPadding + paddingGrid + mobileOffsetX;
+    const offsetY = containerPadding + labelHeight + paddingGrid + mobileOffsetY;
     const top = pos.row * cellSize + offsetY;
     const left = pos.col * cellSize + offsetX;
     return { top, left };
