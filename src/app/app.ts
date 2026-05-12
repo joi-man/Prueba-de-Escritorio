@@ -269,7 +269,7 @@ export class App {
     const containerPadding = isMobile ? 2 : 4;
     const labelHeight = isMobile ? 14 : 18;
     
-    const mobileOffsetX = isMobile ? 2 : 0;
+    const mobileOffsetX = isMobile ? -3 : 0;
     const mobileOffsetY = isMobile ? 4 : 0;
     
     const offsetX = containerPadding + paddingGrid + mobileOffsetX;
