@@ -265,17 +265,13 @@ export class App {
     const isSmallMobile = window.innerWidth <= 400;
     
     const cellSize = isSmallMobile ? 24 : (isMobile ? 28 : 33);
-    const paddingGrid = isMobile ? 1 : 2;
-    const containerPadding = isMobile ? 2 : 4;
+    const gap = 1;
+    const gridPadding = 5;
     const labelHeight = isMobile ? 14 : 18;
+    const containerPadding = isMobile ? 15 : 15;
     
-    const mobileOffsetX = isMobile ? 2 : 0;
-    const mobileOffsetY = isMobile ? 4 : 0;
-    
-    const offsetX = containerPadding + paddingGrid + mobileOffsetX;
-    const offsetY = containerPadding + labelHeight + paddingGrid + mobileOffsetY;
-    const top = pos.row * cellSize + offsetY;
-    const left = pos.col * cellSize + offsetX;
+    const top = pos.row * (cellSize + gap) + gridPadding + labelHeight + containerPadding;
+    const left = pos.col * (cellSize + gap) + gridPadding + containerPadding;
     return { top, left };
   }
 
