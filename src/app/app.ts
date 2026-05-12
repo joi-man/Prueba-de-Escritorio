@@ -264,12 +264,12 @@ export class App {
     const isMobile = window.innerWidth <= 600;
     const isSmallMobile = window.innerWidth <= 400;
     
-    const cellSize = isSmallMobile ? 25 : (isMobile ? 29 : 33);
+    const cellSize = isSmallMobile ? 24 : (isMobile ? 28 : 33);
     const paddingGrid = isMobile ? 1 : 2;
     const containerPadding = isMobile ? 2 : 4;
     const labelHeight = isMobile ? 14 : 18;
     
-    const mobileOffsetX = isMobile ? -3 : 0;
+    const mobileOffsetX = isMobile ? 2 : 0;
     const mobileOffsetY = isMobile ? 4 : 0;
     
     const offsetX = containerPadding + paddingGrid + mobileOffsetX;
