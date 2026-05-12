@@ -293,12 +293,10 @@
     flex-direction: column; 
     height: auto; 
     gap: 10px;
-    align-items: center;
   }
   .left-panel { 
     flex: none; 
     width: 100%; 
-    max-width: 100%;
     position: relative;
     top: 0;
     max-height: none;
@@ -306,7 +304,6 @@
   .right-panel { 
     flex: none; 
     width: 100%; 
-    max-width: 100%;
     min-width: auto;
   }
   .step-content { 
@@ -318,27 +315,13 @@
 @media (max-width: 500px) {
   .app-container {
     padding: 10px;
-    max-width: 100%;
   }
   
   .header {
     padding: 10px;
-    text-align: center;
   }
   
-  .exercise-nav {
-    align-items: center;
-  }
-  
-  .matrix-container, .result-partial-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .matrix-grid {
-    margin: 0 auto;
-  }
+  .controls-info { display: none !important; }
   
   .window-box { display: none !important; }
   
