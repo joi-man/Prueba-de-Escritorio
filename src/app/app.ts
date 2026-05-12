@@ -180,7 +180,8 @@ export class App {
     const step = this.getCurrentStepData();
     if (!step?.position) return false;
     const { row: startRow, col: startCol } = step.position;
-    return row >= startRow && row < startRow + 5 && col >= startCol && col < startCol + 5;
+    const windowSize = this.currentExercise() === 7 ? 3 : 5;
+    return row >= startRow && row < startRow + windowSize && col >= startCol && col < startCol + windowSize;
   }
 
   getMatrixRows(): number[] {
@@ -316,18 +317,29 @@ export class App {
     const step = this.getCurrentStepData();
     if (!step?.position) return { top: 0, left: 0 };
     const pos = step.position;
-    // Celda: 32px, Gap: 1px, Total por celda: 33px
-    // Padding del matrix-grid: 5px
-    // Offset adicional por el label "Imagen Original" y container padding
     const cellSize = 33;
     const paddingGrid = 2;
     const containerPadding = 4;
     const labelHeight = 18;
-    const offsetX = containerPadding + paddingGrid; // 20
-    const offsetY = containerPadding + labelHeight + paddingGrid; // 40
+    const offsetX = containerPadding + paddingGrid;
+    const offsetY = containerPadding + labelHeight + paddingGrid;
     const top = pos.row * cellSize + offsetY;
     const left = pos.col * cellSize + offsetX;
     return { top, left };
+  }
+
+  getWindowSize(): number {
+    return this.currentExercise() === 7 ? 3 : 5;
+  }
+
+  getWindowBoxStyle(): any {
+    const size = this.getWindowSize();
+    const cellSize = 33;
+    const boxSize = size * cellSize;
+    return {
+      width: `${boxSize}px`,
+      height: `${boxSize}px`
+    };
   }
 
   ngOnDestroy() {
